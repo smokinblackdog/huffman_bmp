@@ -1,0 +1,17 @@
+PATH
+  remote: .
+  specs:
+    huffman_bmp (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  x64-mingw-ucrt
+
+DEPENDENCIES
+  huffman_bmp!
+
+BUNDLED WITH
+   2.6.9
