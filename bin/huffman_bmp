@@ -5,36 +5,42 @@ require_relative '../lib/huffman_bmp'
 
 options = {
   mode: :three_trees,
+  algorithm: :huffman,
   action: :compress
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Использование: huffman_bmp [опции]"
+  opts.banner = 'Использование: huffman_bmp [опции]'
 
-  opts.on("-c", "--compress FILE", "Сжать BMP-файл") do |file|
+  opts.on('-c', '--compress FILE', 'Сжать BMP-файл') do |file|
     options[:input] = file
     options[:action] = :compress
   end
 
-  opts.on("-d", "--decompress FILE", "Распаковать сжатый файл") do |file|
+  opts.on('-d', '--decompress FILE', 'Распаковать сжатый файл') do |file|
     options[:input] = file
     options[:action] = :decompress
   end
 
-  opts.on("-o", "--output FILE", "Выходной файл") do |file|
+  opts.on('-o', '--output FILE', 'Выходной файл') do |file|
     options[:output] = file
   end
 
-  opts.on("-H", "--header FILE", "Оригинальный BMP для заголовка (при распаковке)") do |file|
+  opts.on('-H', '--header FILE', 'Оригинальный BMP для заголовка (при распаковке)') do |file|
     options[:header] = file
   end
 
-  opts.on("-m", "--mode MODE", [:three_trees, :single_tree],
-          "Режим сжатия (three_trees, single_tree)") do |mode|
+  opts.on('-m', '--mode MODE', [:three_trees, :single_tree],
+          'Режим сжатия (three_trees, single_tree)') do |mode|
     options[:mode] = mode
   end
 
-  opts.on("-v", "--version", "Показать версию") do
+  opts.on('-a', '--algorithm ALG', [:huffman, :fano],
+          'Алгоритм кодирования (huffman, fano)') do |algorithm|
+    options[:algorithm] = algorithm
+  end
+
+  opts.on('-v', '--version', 'Показать версию') do
     puts "huffman_bmp v#{HuffmanBMP::VERSION}"
     exit
   end
@@ -42,25 +48,31 @@ end.parse!
 
 case options[:action]
 when :compress
-  raise "Укажите входной файл через -c" unless options[:input]
+  raise 'Укажите входной файл через -c' unless options[:input]
   output = options[:output] || "#{options[:input]}.huff"
 
-  result = HuffmanBMP.compress_file(options[:input], output, mode: options[:mode])
+  result = HuffmanBMP.compress_file(
+    options[:input],
+    output,
+    mode: options[:mode],
+    algorithm: options[:algorithm]
+  )
 
-  puts "✓ Сжатие завершено"
+  puts '✓ Сжатие завершено'
   puts "  Исходный размер:  #{result[:original_size]} байт"
   puts "  Сжатый размер:    #{result[:compressed_size]} байт"
   puts "  Степень сжатия:   #{result[:ratio]}%"
   puts "  Режим:            #{result[:mode]}"
+  puts "  Алгоритм:         #{result[:algorithm]}"
   puts "  Выходной файл:    #{output}"
 
 when :decompress
-  raise "Укажите входной файл через -d" unless options[:input]
-  raise "Укажите оригинальный BMP через -H" unless options[:header]
+  raise 'Укажите входной файл через -d' unless options[:input]
+  raise 'Укажите оригинальный BMP через -H' unless options[:header]
   output = options[:output] || options[:input].sub(/\.huff$/, '') + '_restored.bmp'
 
   HuffmanBMP.decompress_file(options[:input], output, header_file: options[:header])
 
-  puts "✓ Распаковка завершена"
+  puts '✓ Распаковка завершена'
   puts "  Выходной файл: #{output}"
 end

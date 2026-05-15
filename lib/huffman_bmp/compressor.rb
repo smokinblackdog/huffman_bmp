@@ -3,15 +3,23 @@ require 'json' # для совместимости
 
 module HuffmanBMP
   module Compressor
+    ALGORITHMS = {
+      huffman: HuffmanTree,
+      fano: FanoTree
+    }.freeze
+
     # Формат сжатых данных:
     # [4 байта: исходная длина (uint32, little-endian)]
     # [1 байт: битовый паддинг (0-7)]
     # [2 байта: длина дерева в JSON (uint16)]
     # [дерево в JSON]
     # [сжатые данные]
-    def self.compress(data)
+    def self.compress(data, algorithm: :huffman)
+      tree_class = ALGORITHMS[algorithm]
+      raise Error, "Неизвестный алгоритм: #{algorithm}" unless tree_class
+
       freq = data.bytes.tally
-      tree = HuffmanTree.new(freq)
+      tree = tree_class.new(freq)
 
       bitstring = data.bytes.map { |b| tree.encode(b) }.join
       packed, padding = BitStream.pack(bitstring)

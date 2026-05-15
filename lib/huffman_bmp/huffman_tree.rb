@@ -40,7 +40,7 @@ module HuffmanBMP
     # Рекурсивное построение кодовой таблицы
     def build_codes(node, prefix, hash)
       if node.leaf?
-        hash[node.byte] = prefix
+        hash[node.byte] = prefix.empty? ? '0' : prefix
       else
         build_codes(node.left, prefix + '0', hash)  if node.left
         build_codes(node.right, prefix + '1', hash) if node.right
